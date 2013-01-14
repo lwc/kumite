@@ -1,9 +1,9 @@
 {
     "name": "lwc/kumite",
-    "version": "1.0.0-b2",
+    "version": "1.0.0-a1",
     "type": "library",    
     "description": "A simple library for multivariate testing in web applications",
-    "keywords": ["multivariate", "split", "a/b", "testing"],
+    "keywords": ["multivariate", "split", "a-b", "testing"],
     "license": "MIT",
     "authors": [
         { "name": "Luke Cawood", "email": "luke.cawood@99designs.com" }

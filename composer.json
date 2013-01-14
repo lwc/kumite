@@ -14,6 +14,9 @@
     "require-dev": {
         "mockery/mockery": ">=0.7.2"
     },
+    "suggest": {
+        "lwc/kumite-moa": "Easily save kumite data in mongodb using moa"
+    },
     "autoload": {
         "psr-0": { "Kumite": "lib" }
     }

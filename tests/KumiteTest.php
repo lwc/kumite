@@ -2,7 +2,7 @@
 
 require_once(__DIR__.'/base.php');
 
-class KumiteTest extends BaseTest
+class KumiteTest //extends BaseTest
 {
 	public function setUp()
 	{

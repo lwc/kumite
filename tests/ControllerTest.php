@@ -18,7 +18,10 @@ class ControllerTest extends BaseTest
 			->shouldReceive('createParticipant')
 			->once()
 			->with('myTest', 'austvideo')
-			->andReturn(100);
+			->andReturn(100)
+			->globally()
+			->ordered()
+			;
 
 		$this->cookieAdapter
 			->shouldReceive('setCookie')
@@ -26,12 +29,16 @@ class ControllerTest extends BaseTest
 				'variant' => 'austvideo',
 				'pid' => 100
 			)))
-			->once();
+			->once()
+			->globally()
+			->ordered()
+			;
 
 		$c = $this->createController();
 		$c->startTest('myTest', function($variants) {
 			return 'austvideo';
 		});
+		return $c;
 	}
 
 	public function testStartTestNoCookieInactive()
@@ -71,11 +78,7 @@ class ControllerTest extends BaseTest
 	public function testAddEventCookie()
 	{
 		$this->expectGetCookie();
-
-		$this->storageAdapter
-			->shouldReceive('createEvent')
-			->with('myTest', 'austvideo', 'sale', 100, array('amount'=>300))
-			->once();
+		$this->expectEventStorage();
 
 		$c = $this->createController();
 		$c->addEvent('myTest', 'sale', array('amount'=>300));
@@ -88,13 +91,39 @@ class ControllerTest extends BaseTest
 		$c->addEvent('myTest', 'sale', array('amount'=>300));
 	}
 
+	public function testStartStarted()
+	{
+		$c = $this->testStartTestNoCookie();
+
+		// should do nothing
+		$c->startTest('myTest', function($variants) {
+			return 'austvideo';
+		});
+	}
+
+	public function testGetActiveVariantStarted()
+	{
+		$c = $this->testStartTestNoCookie();
+		$this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
+	}
+
+	public function testAddEventStarted()
+	{
+		$c = $this->testStartTestNoCookie();
+		$this->expectEventStorage();
+		$c->addEvent('myTest', 'sale', array('amount'=>300));
+	}
+
 	private function expectGetCookieNull()
 	{
 		$this->cookieAdapter
 			->shouldReceive('getCookie')
 			->once()
 			->with('kumite__myTest')
-			->andReturn(null);
+			->andReturn(null)
+			->globally()
+			->ordered()
+			;
 	}
 
 	private function expectGetCookie()
@@ -106,7 +135,21 @@ class ControllerTest extends BaseTest
 			->andReturn(json_encode(array(
 				'variant' => 'austvideo',
 				'pid' => 100
-			)));
+			)))
+			->globally()
+			->ordered()
+			;
+	}
+
+	private function expectEventStorage()
+	{
+		$this->storageAdapter
+			->shouldReceive('createEvent')
+			->with('myTest', 'austvideo', 'sale', 100, array('amount'=>300))
+			->once()
+			->globally()
+			->ordered()
+			;
 	}
 
 	private function createController($options=array())

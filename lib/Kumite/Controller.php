@@ -64,7 +64,7 @@ class Controller
 
 	private function getCookie($testKey)
 	{
-		if (isset($unsavedCookies[$testKey]))
+		if (isset($this->unsavedCookies[$testKey]))
 			return $this->unsavedCookies[$testKey];
 		return json_decode($this->cookieAdapter->getCookie($this->cookieName($testKey)), true);
 	}

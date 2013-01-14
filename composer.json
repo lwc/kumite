@@ -1,0 +1,20 @@
+{
+    "name": "lwc/kumite",
+    "version": "1.0.0-b2",
+    "type": "library",    
+    "description": "A simple library for multivariate testing in web applications",
+    "keywords": ["multivariate", "split", "a/b", "testing"],
+    "license": "MIT",
+    "authors": [
+        { "name": "Luke Cawood", "email": "luke.cawood@99designs.com" }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "require-dev": {
+        "mockery/mockery": ">=0.7.2"
+    },
+    "autoload": {
+        "psr-0": { "Kumite": "lib" }
+    }
+}

@@ -34,6 +34,13 @@ class TestTest extends BaseTest
 		$this->assertEquals($variant, 'austvideo');
 	}
 
+	public function testAllocateConstant()
+	{
+		$t = $this->createTest();
+		$variant = $t->choose('austvideo');
+		$this->assertEquals($variant, 'austvideo');
+	}
+
 	public function testAllocateError()
 	{
 		$t = $this->createTest();

@@ -61,6 +61,8 @@ class Test
 			return $allocator->allocate($this->variantKeys());
 		if (is_callable($allocator))
 			return $allocator($this->variantKeys());
-		throw new Exception('Allocator must be callable or instance of Kumite\\Allocator');
+		if (in_array($allocator, $this->variantKeys()))
+			return $allocator;
+		throw new Exception('Allocator must be callable, instance of Kumite\\Allocator or a variant key');
 	}
 }

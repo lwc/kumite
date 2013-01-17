@@ -5,6 +5,7 @@ use Kumite\Exception;
 class Kumite
 {
 	private static $instance;
+	private static $now;
 	private $controller;
 	private $config;
 	private $cookieAdapter;
@@ -13,17 +14,42 @@ class Kumite
 	// @codeCoverageIgnoreStart
 	public static function start($testKey, $allocator)
 	{
+		self::assertSetup();
 		self::$instance->startTest($testKey, $allocator);
 	}
 
 	public static function event($testKey, $eventKey, $metadata=null)
 	{
+		self::assertSetup();
 		self::$instance->addEvent($testKey, $eventKey, $metadata);
+	}
+
+	public static function variant($testKey)
+	{
+		self::assertSetup();
+		self::$instance->getActiveVariant($testKey);
 	}
 
 	public static function setup($configuration)
 	{
 		self::$instance = new Kumite($configuration);
+	}
+
+	public static function now($now=null)
+	{
+		if ($now)
+			self::$now = $now;
+
+		if (self::$now)
+			return self::$now;
+
+		return date();
+	}
+
+	private static function assertSetup()
+	{
+		if (!isset(self::$instance))
+			throw new Exception("Kumite::setup() needs to be called before this method");
 	}
 	// @codeCoverageIgnoreEnd
 
@@ -53,6 +79,12 @@ class Kumite
 	{
 		$this->init();
 		$this->controller->addEvent($testKey, $eventKey, $metadata);
+	}
+
+	public function getActiveVariant($testKey)
+	{
+		$this->init();
+		$this->controller->getActiveVariant($testKey);
 	}
 
 	public function init()

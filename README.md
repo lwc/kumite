@@ -1,4 +1,3 @@
-
 Table of contents
 - [What is kumite?](#what-is-kumite)
 - [Installing](#installing)
@@ -15,7 +14,10 @@ Table of contents
 
 
 ### What is kumite?
-Kumite is a fairly simple framework for managing multivariate testing.
+Kumite is a  framework for managing split testing.
+
+It's purpose is to manage and track participants in split tests, as well as track events/outcomes. It makes no assumptions about how participants are allocated into variants.
+
 Tests may be defined with a number of variants and an allocation strategy that can assign a variant to a request.
 Events may be tracked against variants, with optional metadata if desired.
 It makes no assumptions about how your application interacts with cookies or how you would like to store test data.
@@ -99,7 +101,7 @@ There are two main ways to vary content to participants in a test, via the varia
 <?php endif; ?>
 ```
 
-Requests that are not participating in the test will be allocated to the defined control variant for purposes of varying content, but no events will be tracked against them.
+Requests that are not participating in the test will be allocated to the defined default variant for purposes of varying content, but no events will be tracked against them.
 
 ##### Tracking events
 Tracking events in kumite is achieved by calling `Kumite::event($testKey, $eventKey, $metadata=array())`:
@@ -123,8 +125,9 @@ Tests are defined in the following format:
 
 $config = array(
   'pricing-test' => array(
-    'active' => true, // boolean, controls if the test is active for participation
-    'control' => 'control', // defines the control variant, served to request not participating in the test
+  'start' => '2012-01-01', // The test will be active between the start and end times
+  'end' => '2012-02-01',
+    'default' => 'control', // defines the default variant, served to request not participating in the test. Typically the control.
     'variants' => array(
       'control', // this variant defines no properties
       'lowerprice' => array('price' => '$300') // this variant defines properties

@@ -39,7 +39,7 @@ class Controller
 	{
 		$cookie = $this->getCookie($testKey);
 		if (!$cookie)
-			return $this->getTest($testKey)->control();
+			return $this->getTest($testKey)->getDefault();
 		return $this->getTest($testKey)->variant($cookie['variant']);
 	}
 

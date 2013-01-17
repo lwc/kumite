@@ -44,7 +44,10 @@ class ControllerTest extends BaseTest
 	public function testStartTestNoCookieInactive()
 	{
 		$this->expectGetCookieNull();
-		$c = $this->createController(array('active'=>false));
+		$c = $this->createController(array(
+			'start' => '2012-06-01',
+			'end' => '2012-06-01',			
+		));
 
 		$c->startTest('myTest', function($variants) {
 			return 'austvideo';
@@ -155,8 +158,9 @@ class ControllerTest extends BaseTest
 	private function createController($options=array())
 	{
 		$this->test = new Kumite\Test('myTest', array_merge(array(
-				'active' => true,
-				'control' => 'control',
+				'start' => '2012-01-01',
+				'end' => '2012-02-01',
+				'default' => 'control',
 				'variants' => array(
 					'control',
 					'austvideo' => array('listid' => '7ae4be2')

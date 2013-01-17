@@ -1,4 +1,4 @@
-<phpunit colors="true" processIsolation="true">
+<phpunit colors="true">
   <testsuites>
     <testsuite name="Kumite tests">
       <directory>tests</directory>

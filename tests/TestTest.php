@@ -9,7 +9,7 @@ class TestTest extends BaseTest
 		$t = $this->createTest();
 		$this->assertEquals($t->key(), 'videotest');
 		$this->assertEquals($t->active(), true);
-		$this->assertEquals($t->control()->key(), 'control');
+		$this->assertEquals($t->getDefault()->key(), 'control');
 		$this->assertEquals($t->variantKeys(), array('control', 'austvideo'));
 		$this->assertEquals($t->variant('austvideo')->key(), 'austvideo');
 		$this->assertEquals($t->variant('austvideo')->property('listid'), '7ae4be2');
@@ -57,13 +57,13 @@ class TestTest extends BaseTest
 	private function createTest()
 	{
 		return new Kumite\Test('videotest', array(
-			'active' => true,
-			'control' => 'control',
+			'start' => '2012-01-01',
+			'end' => '2012-02-01',
+			'default' => 'control',
 			'variants' => array(
 				'control',
 				'austvideo' => array('listid' => '7ae4be2')
 			)
 		));
-
 	}
 }

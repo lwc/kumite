@@ -121,8 +121,9 @@ class KumiteTest //extends BaseTest
 	private function getTestConfig()
 	{
 		return array(
-			'active' => true,
-			'control' => 'control',
+			'start' => '2012-01-01',
+			'end' => '2012-02-01',
+			'default' => 'control',
 			'variants' => array(
 				'control',
 				'austvideo' => array('listid' => '7ae4be2')

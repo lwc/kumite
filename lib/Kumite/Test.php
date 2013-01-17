@@ -4,22 +4,26 @@ namespace Kumite;
 
 class Test
 {
-	private $kumite;
 	private $key;
-	private $active;
-	private $allocator;
-	private $control = 'control';
+	private $start;
+	private $end;
+	private $default = 'control';
 	private $variants = array();
 
 	public function __construct($key, $config)
 	{
 		$this->key = $key;
-		$this->active = isset($config['active']) ? $config['active'] : false;
 
-		if (!isset($config['variants']))
-			throw new Exception('No variants defined in configuration');
+		foreach ($this->requiredKeys() as $requiredKey)
+		{
+			if (!array_key_exists($requiredKey, $config))
+				throw new Exception("Test '$key' missing config key '$requiredKey'");
+		}
+		$this->start = strtotime($config['start']);
+		$this->end = strtotime($config['end']);
 
-		$this->control = $config['control'];
+		if (isset($config['default']))
+			$this->default = $config['default'];
 
 		foreach ($config['variants'] as $key => $value)
 		{
@@ -28,6 +32,9 @@ class Test
 			else
 				$this->variants[$value] = new Variant($value);
 		}
+
+		if (!array_key_exists($this->default, $this->variants))
+			throw new Exception("Default variant '{$this->default}' found");
 	}
 
 	public function key()
@@ -37,7 +44,7 @@ class Test
 
 	public function active()
 	{
-		return $this->active;
+		return (($this->start < \Kumite::now()) && ($this->end > \Kumite::now()));
 	}
 
 	public function variantKeys()
@@ -45,9 +52,9 @@ class Test
 		return array_keys($this->variants);
 	}
 
-	public function control()
+	public function getDefault()
 	{
-		return $this->variants[$this->control];
+		return $this->variants[$this->default];
 	}
 
 	public function variant($variantKey)
@@ -64,5 +71,14 @@ class Test
 		if (in_array($allocator, $this->variantKeys()))
 			return $allocator;
 		throw new Exception('Allocator must be callable, instance of Kumite\\Allocator or a variant key');
+	}
+
+	private function requiredKeys()
+	{
+		return array(
+			'variants',
+			'start',
+			'end'
+		);
 	}
 }

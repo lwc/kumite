@@ -16,6 +16,6 @@ class PhpCookieAdapter implements CookieAdapter
 
 	public function setCookie($name, $data)
 	{
-		setcookie($name, $data);
+		setcookie($name, $data, strtotime('2030-01-01'), '/');
 	}
 }

@@ -46,6 +46,12 @@ class Kumite
 		return date();
 	}
 
+	public static function serveJs($post)
+	{
+		self::assertSetup();
+		self::$instance->processJs($post);
+	}
+
 	private static function assertSetup()
 	{
 		if (!isset(self::$instance))
@@ -85,6 +91,12 @@ class Kumite
 	{
 		$this->init();
 		$this->controller->getActiveVariant($testKey);
+	}
+
+	public function processJs($post)
+	{
+		$this->init();
+		$this->controller->processJs($post);
 	}
 
 	public function init()

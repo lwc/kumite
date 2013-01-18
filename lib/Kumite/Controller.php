@@ -19,6 +19,20 @@ class Controller
 		$this->storageAdapter = $storageAdapter;
 	}
 
+	public function processJs($post)
+	{
+		if (array_key_exists('kumite', $post))
+		{
+			$kumite = $post['kumite'];
+
+			if (array_key_exists('start', $kumite))
+				$this->startTest($kumite['start']['testKey'], $kumite['start']['variant']);
+
+			if (array_key_exists('event', $kumite))
+				$this->addEvent($$kumite['start']['testKey'], $kumite['start']['eventKey'], $kumite['start']['metadata']);
+		}
+	}
+
 	public function startTest($testKey, $allocator)
 	{
 		if (!$this->getCookie($testKey))

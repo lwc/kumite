@@ -43,7 +43,7 @@ class Kumite
 		if (self::$now)
 			return self::$now;
 
-		return date();
+		return time();
 	}
 
 	public static function serveJs($post)

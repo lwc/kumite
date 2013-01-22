@@ -27,7 +27,7 @@ class Kumite
 	public static function variant($testKey)
 	{
 		self::assertSetup();
-		self::$instance->getActiveVariant($testKey);
+		return self::$instance->getActiveVariant($testKey);
 	}
 
 	public static function setup($configuration)
@@ -90,7 +90,7 @@ class Kumite
 	public function getActiveVariant($testKey)
 	{
 		$this->init();
-		$this->controller->getActiveVariant($testKey);
+		return $this->controller->getActiveVariant($testKey);
 	}
 
 	public function processJs($post)

@@ -25,11 +25,17 @@ class Controller
 		{
 			$kumite = $post['kumite'];
 
-			if (array_key_exists('start', $kumite))
+			if (isset($kumite['start']))
 				$this->startTest($kumite['start']['testKey'], $kumite['start']['variant']);
 
-			if (array_key_exists('event', $kumite))
-				$this->addEvent($$kumite['start']['testKey'], $kumite['start']['eventKey'], $kumite['start']['metadata']);
+			if (isset($kumite['event']))
+			{
+				$this->addEvent(
+					$kumite['event']['testKey'],
+					$kumite['event']['eventKey'],
+					isset($kumite['event']['eventKey']) ? $kumite['event']['eventKey'] : null
+				);
+			}
 		}
 	}
 
@@ -91,5 +97,5 @@ class Controller
 	public function getTest($testKey)
 	{
 		return $this->tests[$testKey];
-	}	
+	}
 }

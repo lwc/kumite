@@ -4,98 +4,84 @@ namespace Kumite;
 
 class Controller
 {
-	const COOKIE_PREFIX = 'kumite__';
+    const COOKIE_PREFIX = 'kumite__';
 
-	private $cookieAdapter;
-	private $storageAdapter;
+    private $cookieAdapter;
+    private $storageAdapter;
+    private $tests = array();
+    private $unsavedCookies = array();
 
-	private $tests = array();
-	private $unsavedCookies = array();
+    public function __construct($tests, $storageAdapter, $cookieAdapter)
+    {
+        $this->tests = $tests;
+        $this->cookieAdapter = $cookieAdapter;
+        $this->storageAdapter = $storageAdapter;
+    }
 
-	public function __construct($tests, $storageAdapter, $cookieAdapter)
-	{
-		$this->tests = $tests;
-		$this->cookieAdapter = $cookieAdapter;
-		$this->storageAdapter = $storageAdapter;
-	}
+    public function startTest($testKey, $allocator)
+    {
+        if (!$this->getCookie($testKey)) {
+            $test = $this->getTest($testKey);
+            if (!$test->active())
+                return;
+            $variantKey = $test->choose($allocator);
+            if ($variantKey) {
+                $participantId = $this->storageAdapter->createParticipant($testKey, $variantKey);
+                $this->setCookie($testKey, $variantKey, $participantId);
+            }
+        }
+    }
 
-	public function processJs($post)
-	{
-		if (array_key_exists('kumite', $post))
-		{
-			$kumite = $post['kumite'];
+    public function isInTest($testKey)
+    {
+        return (bool) $this->getCookie($testKey);
+    }
 
-			if (isset($kumite['start']))
-				$this->startTest($kumite['start']['testKey'], $kumite['start']['variant']);
+    public function getActiveVariant($testKey)
+    {
+        $cookie = $this->getCookie($testKey);
+        if (!$cookie)
+            return $this->getTest($testKey)->getDefault();
+        return $this->getTest($testKey)->variant($cookie['variant']);
+    }
 
-			if (isset($kumite['event']))
-			{
-				$this->addEvent(
-					$kumite['event']['testKey'],
-					$kumite['event']['eventKey'],
-					isset($kumite['event']['eventKey']) ? $kumite['event']['eventKey'] : null
-				);
-			}
-		}
-	}
+    public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata)
+    {
+        $this->storageAdapter->createEvent($testKey, $variantKey, $eventKey, $participantId, $metadata);
+    }
 
-	public function startTest($testKey, $allocator)
-	{
-		if (!$this->getCookie($testKey))
-		{
-			$test = $this->getTest($testKey);
-			if (!$test->active())
-				return;
-			$variantKey = $test->choose($allocator);
-			if ($variantKey)
-			{
-				$participantId = $this->storageAdapter->createParticipant($testKey, $variantKey);
-				$this->setCookie($testKey, $variantKey, $participantId);
-			}
-		}
-	}
+    public function addEvent($testKey, $eventKey, $metadata = null)
+    {
+        $cookie = $this->getCookie($testKey);
+        if ($cookie) {
+            $this->storageAdapter->createEvent($testKey, $cookie['variant'], $eventKey, $cookie['pid'], $metadata);
+        }
+    }
 
-	public function getActiveVariant($testKey)
-	{
-		$cookie = $this->getCookie($testKey);
-		if (!$cookie)
-			return $this->getTest($testKey)->getDefault();
-		return $this->getTest($testKey)->variant($cookie['variant']);
-	}
+    private function setCookie($testKey, $variantKey, $participantId)
+    {
+        $cookieData = array(
+            'variant' => $variantKey,
+            'pid' => $participantId
+        );
+        $this->unsavedCookies[$testKey] = $cookieData;
+        $this->cookieAdapter->setCookie($this->cookieName($testKey), json_encode($cookieData));
+    }
 
-	public function addEvent($testKey, $eventKey, $metadata=null)
-	{
-		$cookie = $this->getCookie($testKey);
-		if ($cookie)
-		{
-			$this->storageAdapter->createEvent($testKey, $cookie['variant'], $eventKey, $cookie['pid'], $metadata);
-		}
-	}
+    private function getCookie($testKey)
+    {
+        if (isset($this->unsavedCookies[$testKey]))
+            return $this->unsavedCookies[$testKey];
+        return json_decode($this->cookieAdapter->getCookie($this->cookieName($testKey)), true);
+    }
 
-	private function setCookie($testKey, $variantKey, $participantId)
-	{
-		$cookieData = array(
-			'variant' => $variantKey,
-			'pid' => $participantId
-		);
-		$this->unsavedCookies[$testKey] = $cookieData;
-		$this->cookieAdapter->setCookie($this->cookieName($testKey), json_encode($cookieData));
-	}
+    private function cookieName($testKey)
+    {
+        return self::COOKIE_PREFIX . $testKey;
+    }
 
-	private function getCookie($testKey)
-	{
-		if (isset($this->unsavedCookies[$testKey]))
-			return $this->unsavedCookies[$testKey];
-		return json_decode($this->cookieAdapter->getCookie($this->cookieName($testKey)), true);
-	}
-
-	private function cookieName($testKey)
-	{
-		return self::COOKIE_PREFIX.$testKey;
-	}
-
-	public function getTest($testKey)
-	{
-		return $this->tests[$testKey];
-	}
+    public function getTest($testKey)
+    {
+        return $this->tests[$testKey];
+    }
 }

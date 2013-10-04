@@ -4,81 +4,93 @@ namespace Kumite;
 
 class Test
 {
-	private $key;
-	private $start;
-	private $end;
-	private $default = 'control';
-	private $variants = array();
 
-	public function __construct($key, $config)
-	{
-		$this->key = $key;
+    private $key;
+    private $start;
+    private $end;
+    private $enabled;
+    private $default = 'control';
+    private $variants = array();
 
-		foreach ($this->requiredKeys() as $requiredKey)
-		{
-			if (!array_key_exists($requiredKey, $config))
-				throw new Exception("Test '$key' missing config key '$requiredKey'");
-		}
-		$this->start = strtotime($config['start']);
-		$this->end = strtotime($config['end']);
+    public function __construct($key, $config)
+    {
+        $this->key = $key;
 
-		if (isset($config['default']))
-			$this->default = $config['default'];
+        foreach ($this->requiredKeys() as $requiredKey) {
+            if (!array_key_exists($requiredKey, $config))
+                throw new Exception("Test '$key' missing config key '$requiredKey'");
+        }
 
-		foreach ($config['variants'] as $key => $value)
-		{
-			if (is_array($value))
-				$this->variants[$key] = new Variant($key, $value);
-			else
-				$this->variants[$value] = new Variant($value);
-		}
+        if (isset($config['enabled'])) {
+            $this->enabled = $config['enabled'];
+        }
+        else if (isset($config['start']) && isset($config['end'])) {
+            $this->start = strtotime($config['start']);
+            $this->end = strtotime($config['end']);
+        }
+        else {
+            throw new Exception('Either enabled or start & end must be defined');
+        }
 
-		if (!array_key_exists($this->default, $this->variants))
-			throw new Exception("Default variant '{$this->default}' found");
-	}
+        if (isset($config['default'])) {
+            $this->default = $config['default'];
+        }
 
-	public function key()
-	{
-		return $this->key;
-	}
+        foreach ($config['variants'] as $key => $value) {
+            if (is_array($value))
+                $this->variants[$key] = new Variant($key, $value);
+            else
+                $this->variants[$value] = new Variant($value);
+        }
 
-	public function active()
-	{
-		return (($this->start < \Kumite::now()) && ($this->end > \Kumite::now()));
-	}
+        if (!array_key_exists($this->default, $this->variants)) {
+            throw new Exception("Default variant '{$this->default}' found");
+        }
+    }
 
-	public function variantKeys()
-	{
-		return array_keys($this->variants);
-	}
+    public function key()
+    {
+        return $this->key;
+    }
 
-	public function getDefault()
-	{
-		return $this->variants[$this->default];
-	}
+    public function active()
+    {
+        if (isset($this->enabled)) {
+            return $this->enabled;
+        }
+        return (($this->start < \Kumite::now()) && ($this->end > \Kumite::now()));
+    }
 
-	public function variant($variantKey)
-	{
-		return $this->variants[$variantKey];
-	}
+    public function variantKeys()
+    {
+        return array_keys($this->variants);
+    }
 
-	public function choose($allocator)
-	{
-		if ($allocator instanceof Allocator)
-			return $allocator->allocate($this->variantKeys());
-		if (is_callable($allocator))
-			return $allocator($this->variantKeys());
-		if (in_array($allocator, $this->variantKeys()))
-			return $allocator;
-		throw new Exception('Allocator must be callable, instance of Kumite\\Allocator or a variant key');
-	}
+    public function getDefault()
+    {
+        return $this->variants[$this->default];
+    }
 
-	private function requiredKeys()
-	{
-		return array(
-			'variants',
-			'start',
-			'end'
-		);
-	}
+    public function variant($variantKey)
+    {
+        return $this->variants[$variantKey];
+    }
+
+    public function choose($allocator)
+    {
+        if ($allocator instanceof Allocator)
+            return $allocator->allocate($this->variantKeys());
+        if (is_callable($allocator))
+            return $allocator($this->variantKeys());
+        if (in_array($allocator, $this->variantKeys()))
+            return $allocator;
+        throw new Exception('Allocator must be callable, instance of Kumite\\Allocator or a variant key');
+    }
+
+    private function requiredKeys()
+    {
+        return array(
+            'variants',
+        );
+    }
 }

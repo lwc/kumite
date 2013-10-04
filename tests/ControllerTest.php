@@ -1,174 +1,197 @@
-<?php 
+<?php
 
-require_once(__DIR__.'/base.php');
+require_once(__DIR__ . '/base.php');
 
 class ControllerTest extends BaseTest
 {
-	public function setUp()
-	{
-		$this->cookieAdapter = Mockery::mock('Kumite\\Adapters\\CookieAdapter');
-		$this->storageAdapter = Mockery::mock('Kumite\\Adapters\\StorageAdapter');
-	}
+    public function setUp()
+    {
+        $this->cookieAdapter = Mockery::mock('Kumite\\Adapters\\CookieAdapter');
+        $this->storageAdapter = Mockery::mock('Kumite\\Adapters\\StorageAdapter');
+    }
 
-	public function testStartTestNoCookie()
-	{
-		$this->expectGetCookieNull();
+    public function testStartTestNoCookie()
+    {
+        $this->expectGetCookieNull();
 
-		$this->storageAdapter
-			->shouldReceive('createParticipant')
-			->once()
-			->with('myTest', 'austvideo')
-			->andReturn(100)
-			->globally()
-			->ordered()
-			;
+        $this->storageAdapter
+            ->shouldReceive('createParticipant')
+            ->once()
+            ->with('myTest', 'austvideo')
+            ->andReturn(100)
+            ->globally()
+            ->ordered()
+        ;
 
-		$this->cookieAdapter
-			->shouldReceive('setCookie')
-			->with('kumite__myTest', json_encode(array(
-				'variant' => 'austvideo',
-				'pid' => 100
-			)))
-			->once()
-			->globally()
-			->ordered()
-			;
+        $this->cookieAdapter
+            ->shouldReceive('setCookie')
+            ->with('kumite__myTest', json_encode(array(
+                'variant' => 'austvideo',
+                'pid' => 100
+            )))
+            ->once()
+            ->globally()
+            ->ordered()
+        ;
 
-		$c = $this->createController();
-		$c->startTest('myTest', function($variants) {
-			return 'austvideo';
-		});
-		return $c;
-	}
+        $c = $this->createController();
+        $c->startTest('myTest', function($variants)
+            {
+                return 'austvideo';
+            });
+        return $c;
+    }
 
-	public function testStartTestNoCookieInactive()
-	{
-		$this->expectGetCookieNull();
-		$c = $this->createController(array(
-			'start' => '2012-06-01',
-			'end' => '2012-06-01',			
-		));
+    public function testStartTestNoCookieInactive()
+    {
+        $this->expectGetCookieNull();
+        $c = $this->createController(array(
+            'start' => '2012-06-01',
+            'end' => '2012-06-01',
+        ));
 
-		$c->startTest('myTest', function($variants) {
-			return 'austvideo';
-		});
-	}
+        $c->startTest('myTest', function($variants)
+            {
+                return 'austvideo';
+            });
+    }
 
-	public function testStartTestCookie()
-	{
-		$this->expectGetCookie();
-		$c = $this->createController();
+    public function testStartTestCookie()
+    {
+        $this->expectGetCookie();
+        $c = $this->createController();
 
-		$c->startTest('myTest', function($variants) {
-			return 'austvideo';
-		});
-	}
+        $c->startTest('myTest', function($variants) {
+            return 'austvideo';
+        });
+    }
 
-	public function testGetActiveVariantCookie()
-	{
-		$this->expectGetCookie();
-		$c = $this->createController();
-		$this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
-	}
+    public function testNotInTest()
+    {
+        $this->expectGetCookieNull();
+        $c = $this->createController();
+        $this->assertEquals($c->isInTest('myTest'), false);
+    }
 
-	public function testGetActiveVariantNoCookie()
-	{
-		$this->expectGetCookieNull();
-		$c = $this->createController();
-		$this->assertEquals($c->getActiveVariant('myTest')->key(), 'control');
-	}
+    public function testIsInTest()
+    {
+        $this->expectGetCookie();
+        $c = $this->createController();
+        $this->assertEquals($c->isInTest('myTest'), true);
+    }
 
-	public function testAddEventCookie()
-	{
-		$this->expectGetCookie();
-		$this->expectEventStorage();
+    public function testGetActiveVariantCookie()
+    {
+        $this->expectGetCookie();
+        $c = $this->createController();
+        $this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
+    }
 
-		$c = $this->createController();
-		$c->addEvent('myTest', 'sale', array('amount'=>300));
-	}
+    public function testGetActiveVariantNoCookie()
+    {
+        $this->expectGetCookieNull();
+        $c = $this->createController();
+        $this->assertEquals($c->getActiveVariant('myTest')->key(), 'control');
+    }
 
-	public function testAddEventNoCookie()
-	{
-		$this->expectGetCookieNull();
-		$c = $this->createController();
-		$c->addEvent('myTest', 'sale', array('amount'=>300));
-	}
+    public function testAddEventCookie()
+    {
+        $this->expectGetCookie();
+        $this->expectEventStorage();
 
-	public function testStartStarted()
-	{
-		$c = $this->testStartTestNoCookie();
+        $c = $this->createController();
+        $c->addEvent('myTest', 'sale', array('amount' => 300));
+    }
 
-		// should do nothing
-		$c->startTest('myTest', function($variants) {
-			return 'austvideo';
-		});
-	}
+    public function testAddEventNoCookie()
+    {
+        $this->expectGetCookieNull();
+        $c = $this->createController();
+        $c->addEvent('myTest', 'sale', array('amount' => 300));
+    }
 
-	public function testGetActiveVariantStarted()
-	{
-		$c = $this->testStartTestNoCookie();
-		$this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
-	}
+    public function testAddEventOffline()
+    {
+        $this->expectEventStorage();
+        $c = $this->createController();
+        $c->addEventOffline('myTest', 'austvideo', 'sale', 100, array('amount' => 300));
+    }
 
-	public function testAddEventStarted()
-	{
-		$c = $this->testStartTestNoCookie();
-		$this->expectEventStorage();
-		$c->addEvent('myTest', 'sale', array('amount'=>300));
-	}
+    public function testStartStarted()
+    {
+        $c = $this->testStartTestNoCookie();
 
-	private function expectGetCookieNull()
-	{
-		$this->cookieAdapter
-			->shouldReceive('getCookie')
-			->once()
-			->with('kumite__myTest')
-			->andReturn(null)
-			->globally()
-			->ordered()
-			;
-	}
+        // should do nothing
+        $c->startTest('myTest', function($variants) {
+            return 'austvideo';
+        });
+    }
 
-	private function expectGetCookie()
-	{
-		$this->cookieAdapter
-			->shouldReceive('getCookie')
-			->once()
-			->with('kumite__myTest')
-			->andReturn(json_encode(array(
-				'variant' => 'austvideo',
-				'pid' => 100
-			)))
-			->globally()
-			->ordered()
-			;
-	}
+    public function testGetActiveVariantStarted()
+    {
+        $c = $this->testStartTestNoCookie();
+        $this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
+    }
 
-	private function expectEventStorage()
-	{
-		$this->storageAdapter
-			->shouldReceive('createEvent')
-			->with('myTest', 'austvideo', 'sale', 100, array('amount'=>300))
-			->once()
-			->globally()
-			->ordered()
-			;
-	}
+    public function testAddEventStarted()
+    {
+        $c = $this->testStartTestNoCookie();
+        $this->expectEventStorage();
+        $c->addEvent('myTest', 'sale', array('amount' => 300));
+    }
 
-	private function createController($options=array())
-	{
-		$this->test = new Kumite\Test('myTest', array_merge(array(
-				'start' => '2012-01-01',
-				'end' => '2012-02-01',
-				'default' => 'control',
-				'variants' => array(
-					'control',
-					'austvideo' => array('listid' => '7ae4be2')
-				)
-			), $options)
-		);
-		return new Kumite\Controller(array(
-			'myTest' => $this->test
-		), $this->storageAdapter, $this->cookieAdapter);
-	}
+    private function expectGetCookieNull()
+    {
+        $this->cookieAdapter
+            ->shouldReceive('getCookie')
+            ->once()
+            ->with('kumite__myTest')
+            ->andReturn(null)
+            ->globally()
+            ->ordered()
+        ;
+    }
+
+    private function expectGetCookie()
+    {
+        $this->cookieAdapter
+            ->shouldReceive('getCookie')
+            ->once()
+            ->with('kumite__myTest')
+            ->andReturn(json_encode(array(
+                'variant' => 'austvideo',
+                'pid' => 100
+            )))
+            ->globally()
+            ->ordered()
+        ;
+    }
+
+    private function expectEventStorage()
+    {
+        $this->storageAdapter
+            ->shouldReceive('createEvent')
+            ->with('myTest', 'austvideo', 'sale', 100, array('amount' => 300))
+            ->once()
+            ->globally()
+            ->ordered()
+        ;
+    }
+
+    private function createController($options = array())
+    {
+        $this->test = new Kumite\Test('myTest', array_merge(array(
+                'start' => '2012-01-01',
+                'end' => '2012-02-01',
+                'default' => 'control',
+                'variants' => array(
+                    'control',
+                    'austvideo' => array('listid' => '7ae4be2')
+                )
+            ), $options)
+        );
+        return new Kumite\Controller(array(
+            'myTest' => $this->test
+            ), $this->storageAdapter, $this->cookieAdapter);
+    }
 }

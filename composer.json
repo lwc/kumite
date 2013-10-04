@@ -1,6 +1,6 @@
 {
     "name": "lwc/kumite",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "library",    
     "description": "A simple library for multivariate testing in web applications",
     "keywords": ["multivariate", "split", "a-b", "testing"],

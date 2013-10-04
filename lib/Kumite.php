@@ -21,7 +21,7 @@ class Kumite
     public static function inTest($testKey)
     {
         self::assertSetup();
-        return self::$instance->inTest($testKey);
+        return self::$instance->isInTest($testKey);
     }
 
     public static function participantId($testKey)

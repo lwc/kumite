@@ -32,6 +32,14 @@ class Controller
         }
     }
 
+    public function getParticipantId($testKey)
+    {
+        $cookie = $this->getCookie($testKey);
+        if ($cookie) {
+            return $cookie['pid'];
+        }
+    }
+
     public function isInTest($testKey)
     {
         return (bool) $this->getCookie($testKey);

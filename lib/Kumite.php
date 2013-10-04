@@ -21,7 +21,13 @@ class Kumite
     public static function inTest($testKey)
     {
         self::assertSetup();
-        self::$instance->inTest($testKey);
+        return self::$instance->inTest($testKey);
+    }
+
+    public static function participantId($testKey)
+    {
+        self::assertSetup();
+        return self::$instance->getParticipantId($testKey);
     }
 
     public static function event($testKey, $eventKey, $metadata = null)
@@ -92,6 +98,12 @@ class Kumite
     {
         $this->init();
         return $this->controller->isInTest($testKey);
+    }
+
+    public function getParticipantId($testKey)
+    {
+        $this->init();
+        return $this->controller->getParticipantId($testKey);
     }
 
     public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata)

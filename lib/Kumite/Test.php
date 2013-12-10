@@ -5,6 +5,8 @@ namespace Kumite;
 class Test
 {
 
+    private $storageAdapter;
+    private $allocator;
     private $key;
     private $start;
     private $end;
@@ -12,8 +14,9 @@ class Test
     private $default = 'control';
     private $variants = array();
 
-    public function __construct($key, $config)
+    public function __construct($key, $config, $storageAdapter)
     {
+        $this->storageAdapter = $storageAdapter;
         $this->key = $key;
 
         foreach ($this->requiredKeys() as $requiredKey) {
@@ -35,6 +38,11 @@ class Test
         if (isset($config['default'])) {
             $this->default = $config['default'];
         }
+
+        if (!$config['allocator'] instanceof Allocator && !is_callable($config['allocator']) ) {
+            throw new Exception('Allocator must be callable, instance of Kumite\\Allocator');
+        }
+        $this->allocator = $config['allocator'];
 
         foreach ($config['variants'] as $key => $value) {
             if (is_array($value))
@@ -76,21 +84,40 @@ class Test
         return $this->variants[$variantKey];
     }
 
-    public function choose($allocator)
+    public function allocate()
     {
-        if ($allocator instanceof Allocator)
-            return $allocator->allocate($this->variantKeys());
-        if (is_callable($allocator))
-            return $allocator($this->variantKeys());
-        if (in_array($allocator, $this->variantKeys()))
-            return $allocator;
-        throw new Exception('Allocator must be callable, instance of Kumite\\Allocator or a variant key');
+        $allocator = $this->allocator;
+        if (is_callable($allocator)) {
+            return $allocator($this);
+        }
+        return $allocator->allocate($this);
+    }
+
+    public function createParticipant($variantKey, $metadata = null)
+    {
+        return $this->storageAdapter->createParticipant($this->key, $variantKey, $metadata);
+    }
+
+    public function createEvent($variantKey, $eventKey, $participantId, $metadata = null)
+    {
+        return $this->storageAdapter->createEvent($this->key, $variantKey, $eventKey, $participantId, $metadata);
+    }
+
+    public function countParticipants($variantKey)
+    {
+        return $this->storageAdapter->countParticipants($this->key, $variantKey);
+    }
+
+    public function countEvents($variantKey, $eventKey)
+    {
+        return $this->storageAdapter->countEvents($this->key, $variantKey, $eventKey);
     }
 
     private function requiredKeys()
     {
         return array(
             'variants',
+            'allocator'
         );
     }
 }

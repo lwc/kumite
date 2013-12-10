@@ -4,5 +4,5 @@ namespace Kumite;
 
 interface Allocator
 {
-	public function allocate($variantKeys);
+	public function allocate(Test $test);
 }

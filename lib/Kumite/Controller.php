@@ -7,26 +7,24 @@ class Controller
     const COOKIE_PREFIX = 'kumite__';
 
     private $cookieAdapter;
-    private $storageAdapter;
     private $tests = array();
     private $unsavedCookies = array();
 
-    public function __construct($tests, $storageAdapter, $cookieAdapter)
+    public function __construct($tests, $cookieAdapter)
     {
         $this->tests = $tests;
         $this->cookieAdapter = $cookieAdapter;
-        $this->storageAdapter = $storageAdapter;
     }
 
-    public function startTest($testKey, $allocator)
+    public function startTest($testKey, $metadata = null)
     {
         if (!$this->getCookie($testKey)) {
             $test = $this->getTest($testKey);
             if (!$test->active())
                 return;
-            $variantKey = $test->choose($allocator);
+            $variantKey = $test->allocate();
             if ($variantKey) {
-                $participantId = $this->storageAdapter->createParticipant($testKey, $variantKey);
+                $participantId = $test->createParticipant($variantKey, $metadata);
                 $this->setCookie($testKey, $variantKey, $participantId);
             }
         }
@@ -55,14 +53,16 @@ class Controller
 
     public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata)
     {
-        $this->storageAdapter->createEvent($testKey, $variantKey, $eventKey, $participantId, $metadata);
+        $test = $this->getTest($testKey);
+        $test->createEvent($variantKey, $eventKey, $participantId, $metadata);
     }
 
     public function addEvent($testKey, $eventKey, $metadata = null)
     {
         $cookie = $this->getCookie($testKey);
         if ($cookie) {
-            $this->storageAdapter->createEvent($testKey, $cookie['variant'], $eventKey, $cookie['pid'], $metadata);
+            $test = $this->getTest($testKey);
+            $test->createEvent($cookie['variant'], $eventKey, $cookie['pid'], $metadata);
         }
     }
 

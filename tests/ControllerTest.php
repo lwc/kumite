@@ -17,7 +17,7 @@ class ControllerTest extends BaseTest
         $this->storageAdapter
             ->shouldReceive('createParticipant')
             ->once()
-            ->with('myTest', 'austvideo')
+            ->with('myTest', 'austvideo', null)
             ->andReturn(100)
             ->globally()
             ->ordered()
@@ -35,10 +35,7 @@ class ControllerTest extends BaseTest
         ;
 
         $c = $this->createController();
-        $c->startTest('myTest', function($variants)
-            {
-                return 'austvideo';
-            });
+        $c->startTest('myTest');
         return $c;
     }
 
@@ -50,10 +47,7 @@ class ControllerTest extends BaseTest
             'end' => '2012-06-01',
         ));
 
-        $c->startTest('myTest', function($variants)
-            {
-                return 'austvideo';
-            });
+        $c->startTest('myTest');
     }
 
     public function testStartTestCookie()
@@ -61,9 +55,7 @@ class ControllerTest extends BaseTest
         $this->expectGetCookie();
         $c = $this->createController();
 
-        $c->startTest('myTest', function($variants) {
-            return 'austvideo';
-        });
+        $c->startTest('myTest');
     }
 
     public function testNotInTest()
@@ -122,9 +114,7 @@ class ControllerTest extends BaseTest
         $c = $this->testStartTestNoCookie();
 
         // should do nothing
-        $c->startTest('myTest', function($variants) {
-            return 'austvideo';
-        });
+        $c->startTest('myTest');
     }
 
     public function testGetActiveVariantStarted()
@@ -183,15 +173,18 @@ class ControllerTest extends BaseTest
         $this->test = new Kumite\Test('myTest', array_merge(array(
                 'start' => '2012-01-01',
                 'end' => '2012-02-01',
+                'allocator' => function($test) {
+                    return 'austvideo';
+                },
                 'default' => 'control',
                 'variants' => array(
                     'control',
                     'austvideo' => array('listid' => '7ae4be2')
                 )
-            ), $options)
+            ), $options), $this->storageAdapter
         );
         return new Kumite\Controller(array(
             'myTest' => $this->test
-            ), $this->storageAdapter, $this->cookieAdapter);
+            ), $this->cookieAdapter);
     }
 }

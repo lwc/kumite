@@ -15,44 +15,6 @@ class TestTest extends BaseTest
         $this->assertEquals($t->variant('austvideo')->property('listid'), '7ae4be2');
     }
 
-    public function testAllocateCallable()
-    {
-        $t = $this->createTest();
-        $variant = $t->choose(function($variants) {
-            return $variants[0];
-        });
-        $this->assertEquals($variant, 'control');
-    }
-
-    public function testAllocateAllocator()
-    {
-        $t = $this->createTest();
-        $allocator = Mockery::mock('Kumite\\Allocator');
-        $allocator->shouldReceive('allocate')->andReturn('austvideo');
-
-        $variant = $t->choose($allocator);
-        $this->assertEquals($variant, 'austvideo');
-    }
-
-    public function testAllocateConstant()
-    {
-        $t = $this->createTest();
-        $variant = $t->choose('austvideo');
-        $this->assertEquals($variant, 'austvideo');
-    }
-
-    public function testAllocateError()
-    {
-        $t = $this->createTest();
-        try {
-            $t->choose('this isnt an allocator');
-            $this->fail('Expected exception');
-        }
-        catch (Kumite\Exception $e) {
-
-        }
-    }
-
     public function testEnabled()
     {
         $test = $this->createTest(array(
@@ -101,14 +63,19 @@ class TestTest extends BaseTest
 
     private function createTest($data = array())
     {
+        $storageAdapter = Mockery::mock('Kumite\\Adapters\\StorageAdapter');
+
         return new Kumite\Test('videotest', array_merge(array(
                 'start' => '2012-01-01',
                 'end' => '2012-02-01',
                 'default' => 'control',
+                'allocator' => function($test) {
+                    return 'austvideo';
+                },
                 'variants' => array(
                     'control',
                     'austvideo' => array('listid' => '7ae4be2')
                 )
-                ), $data));
+                ), $data), $storageAdapter);
     }
 }

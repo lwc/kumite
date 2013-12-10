@@ -12,10 +12,10 @@ class Kumite
     private $storageAdapter;
 
     // @codeCoverageIgnoreStart
-    public static function start($testKey, $allocator)
+    public static function start($testKey, $metadata = null)
     {
         self::assertSetup();
-        self::$instance->startTest($testKey, $allocator);
+        self::$instance->startTest($testKey, $metadata);
     }
 
     public static function inTest($testKey)
@@ -88,10 +88,10 @@ class Kumite
         $this->config = $configuration['tests'];
     }
 
-    public function startTest($testKey, $allocator)
+    public function startTest($testKey, $metadata)
     {
         $this->init();
-        $this->controller->startTest($testKey, $allocator);
+        $this->controller->startTest($testKey, $metadata);
     }
 
     public function isInTest($testKey)
@@ -133,9 +133,9 @@ class Kumite
             }
             $tests = array();
             foreach ($config as $testKey => $config) {
-                $tests[$testKey] = new Kumite\Test($testKey, $config);
+                $tests[$testKey] = new Kumite\Test($testKey, $config, $this->storageAdapter);
             }
-            $this->controller = new Kumite\Controller($tests, $this->storageAdapter, $this->cookieAdapter);
+            $this->controller = new Kumite\Controller($tests, $this->cookieAdapter);
         }
     }
 }

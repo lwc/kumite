@@ -14,6 +14,7 @@ class Test
     private $default = 'control';
     private $variants = array();
     private $events;
+    private $results;
 
     public function __construct($key, $config, $storageAdapter)
     {
@@ -119,6 +120,14 @@ class Test
     public function countEvents($variantKey, $eventKey)
     {
         return $this->storageAdapter->countEvents($this->key, $variantKey, $eventKey);
+    }
+
+    public function results()
+    {
+        if (!isset($this->results)) {
+            $this->results = new Results($this);
+        }
+        return $this->results;
     }
 
     private function requiredKeys()

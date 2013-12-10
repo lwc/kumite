@@ -1,7 +1,7 @@
 {
     "name": "lwc/kumite",
     "version": "1.0.3",
-    "type": "library",
+    "type": "library",    
     "description": "A simple library for multivariate testing in web applications",
     "keywords": ["multivariate", "split", "a-b", "testing"],
     "license": "MIT",
@@ -19,6 +19,6 @@
         "lwc/kumite-moa": "Easily save kumite data in mongodb using moa"
     },
     "autoload": {
-        "psr-0": { "Kumite\\": "lib" }
+        "psr-0": { "Kumite": "lib" }
     }
 }

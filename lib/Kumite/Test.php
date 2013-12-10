@@ -13,6 +13,7 @@ class Test
     private $enabled;
     private $default = 'control';
     private $variants = array();
+    private $events;
 
     public function __construct($key, $config, $storageAdapter)
     {
@@ -51,6 +52,8 @@ class Test
                 $this->variants[$value] = new Variant($value);
         }
 
+        $this->events = $config['events'];
+
         if (!array_key_exists($this->default, $this->variants)) {
             throw new Exception("Default variant '{$this->default}' found");
         }
@@ -72,6 +75,11 @@ class Test
     public function variantKeys()
     {
         return array_keys($this->variants);
+    }
+
+    public function eventKeys()
+    {
+        return $this->events;
     }
 
     public function getDefault()
@@ -117,6 +125,7 @@ class Test
     {
         return array(
             'variants',
+            'events',
             'allocator'
         );
     }

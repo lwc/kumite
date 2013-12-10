@@ -4,6 +4,9 @@ namespace Kumite;
 
 class Results
 {
+    /**
+     * @var Test
+     */
     private $test;
     private $totalParticipants = 0;
     private $variantTotals = array();
@@ -18,17 +21,19 @@ class Results
 
     private function query()
     {
-        $pTotal = KumiteParticipant::getTotalsForTest($this->testKey);
-        $eTotal = KumiteEvent::getTotalsForTest($this->testKey);
+        foreach ($this->test->variantKeys() as $variantKey) {
 
-        foreach ($pTotal as $row) {
-            $this->totalParticipants += $row['total'];
-            $this->variantTotals[$row['variantkey']] = $row['total'];
-        }
+            $numP = $this->test->countParticipants($variantKey);
 
-        foreach ($eTotal as $row) {
-            $this->eventTotals[$row['variantkey']][$row['eventkey']] = $row['total'];
-            $this->events[$row['eventkey']] = $row['eventkey'];
+            $this->totalParticipants += $numP;
+            $this->variantTotals[$variantKey] = $numP;
+
+            foreach ($this->test->eventKeys() as $eventKey) {
+
+                $numEvents = $this->test->countEvents($variantKey, $eventKey);
+                $this->eventTotals[$variantKey][$eventKey] = $numEvents;
+                $this->events[$eventKey] = $eventKey;
+            }
         }
     }
 

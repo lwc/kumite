@@ -88,7 +88,7 @@ class Kumite
         $this->config = $configuration['tests'];
     }
 
-    public function startTest($testKey, $metadata)
+    public function startTest($testKey, $metadata=null)
     {
         $this->init();
         $this->controller->startTest($testKey, $metadata);
@@ -112,13 +112,13 @@ class Kumite
         return $this->controller->getParticipantId($testKey);
     }
 
-    public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata)
+    public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata=null)
     {
         $this->init();
         $this->controller->addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata);
     }
 
-    public function addEvent($testKey, $eventKey, $metadata)
+    public function addEvent($testKey, $eventKey, $metadata=null)
     {
         $this->init();
         $this->controller->addEvent($testKey, $eventKey, $metadata);

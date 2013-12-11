@@ -88,6 +88,11 @@ class Controller
         return self::COOKIE_PREFIX . $testKey;
     }
 
+    public function getTests()
+    {
+        return $this->tests;
+    }
+
     public function getTest($testKey)
     {
         return $this->tests[$testKey];

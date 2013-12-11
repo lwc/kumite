@@ -94,7 +94,7 @@ class Kumite
         $this->controller->startTest($testKey, $metadata);
     }
 
-    public function getTests($testKey)
+    public function getTests()
     {
         $this->init();
         return $this->controller->getTests();

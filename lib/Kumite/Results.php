@@ -66,19 +66,25 @@ class Results
 
     public function conversionRate($variantKey, $eventKey)
     {
-        return 1.0 * $this->eventTotal($variantKey, $eventKey) / $this->variantTotal($variantKey);
+        $total = $this->variantTotal($variantKey);
+        return $total == 0
+            ? 0.0
+            : 1.0 * $this->eventTotal($variantKey, $eventKey) / $total;
     }
 
     public function eventPercent($variantKey, $eventKey)
     {
-        return round($this->conversionRate($variantKey, $eventKey) * 100, 2);
+        $rate = $this->conversionRate($variantKey, $eventKey);
+        return round($rate * 100, 2);
     }
 
     public function confidenceInterval($variantKey, $eventKey)
     {
         $views = $this->variantTotal($variantKey);
         $rate = $this->conversionRate($variantKey, $eventKey);
-        $standardError = sqrt(($rate * (1 - $rate)) / $views);
+        $standardError = $views == 0
+            ? 0
+            : sqrt(($rate * (1 - $rate)) / $views);
         return round($standardError * 1.96 * 100, 2);
     }
 
@@ -86,7 +92,9 @@ class Results
     {
         $cRate = $this->conversionRate($controlKey, $eventKey);
         $vRate = $this->conversionRate($variantKey, $eventKey);
-        return round((($vRate - $cRate) / $cRate) * 100, 2);
+        return $cRate == 0
+            ? 0.0
+            : round((($vRate - $cRate) / $cRate) * 100, 2);
     }
 
     public function significance($variantKey, $controlKey, $eventKey)

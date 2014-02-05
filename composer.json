@@ -1,7 +1,7 @@
 {
     "name": "lwc/kumite",
     "version": "1.0.3",
-    "type": "library",    
+    "type": "library",
     "description": "A simple library for multivariate testing in web applications",
     "keywords": ["multivariate", "split", "a-b", "testing"],
     "license": "MIT",
@@ -9,11 +9,11 @@
         { "name": "Luke Cawood", "email": "luke.cawood@99designs.com" }
     ],
     "require": {
-        "php": ">=5.3.2",
-        "phpunit/phpunit": "~3.7"
+        "php": ">=5.3.2"
     },
     "require-dev": {
-        "mockery/mockery": ">=0.7.2"
+        "mockery/mockery": ">=0.7.2",
+        "phpunit/phpunit": "~3.7"
     },
     "suggest": {
         "lwc/kumite-moa": "Easily save kumite data in mongodb using moa"

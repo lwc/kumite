@@ -36,7 +36,7 @@ class TestTest extends BaseTest
                     'control',
                     'austvideo' => array('listid' => '7ae4be2')
                 )
-            ));
+            ), Mockery::mock('Kumite\\Adapters\\StorageAdapter'));
             $this->fail('Expected exception');
         }
         catch (Kumite\Exception $e) {
@@ -53,7 +53,7 @@ class TestTest extends BaseTest
                     'meow',
                     'austvideo' => array('listid' => '7ae4be2'),
                 )
-            ));
+            ), Mockery::mock('Kumite\\Adapters\\StorageAdapter'));
             $this->fail('Expected exception');
         }
         catch (Kumite\Exception $e) {
@@ -72,6 +72,9 @@ class TestTest extends BaseTest
                 'allocator' => function($test) {
                     return 'austvideo';
                 },
+                'events' => array(
+                    'someEvent'
+                ),
                 'variants' => array(
                     'control',
                     'austvideo' => array('listid' => '7ae4be2')

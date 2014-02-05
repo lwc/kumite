@@ -41,7 +41,6 @@ class ControllerTest extends BaseTest
 
     public function testStartTestNoCookieInactive()
     {
-        $this->expectGetCookieNull();
         $c = $this->createController(array(
             'start' => '2012-06-01',
             'end' => '2012-06-01',
@@ -180,6 +179,9 @@ class ControllerTest extends BaseTest
                 'variants' => array(
                     'control',
                     'austvideo' => array('listid' => '7ae4be2')
+                ),
+                'events' => array(
+                    'sale'
                 )
             ), $options), $this->storageAdapter
         );

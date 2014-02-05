@@ -12,6 +12,7 @@ class Test
     private $end;
     private $enabled;
     private $default = 'control';
+    private $version;
     private $variants = array();
     private $events;
     private $results;
@@ -39,6 +40,10 @@ class Test
 
         if (isset($config['default'])) {
             $this->default = $config['default'];
+        }
+
+        if (isset($config['version'])) {
+            $this->version = $config['version'];
         }
 
         if (!$config['allocator'] instanceof Allocator && !is_callable($config['allocator']) ) {
@@ -71,6 +76,11 @@ class Test
             return $this->enabled;
         }
         return (($this->start < \Kumite::now()) && ($this->end > \Kumite::now()));
+    }
+
+    public function version()
+    {
+        return $this->version;
     }
 
     public function variantKeys()

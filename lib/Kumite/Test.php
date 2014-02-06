@@ -90,9 +90,17 @@ class Test
         return $this->variants[$variantKey];
     }
 
-    public function allocate()
+    public function allocate($allocatorOverride=null)
     {
-        $allocator = $this->allocator;
+        if (isset($allocatorOverride)) {
+            $allocator = $allocatorOverride;
+        } else {
+            $allocator = $this->allocator;
+        }
+
+        if (is_string($allocator)) {
+            return $allocator;
+        }
         if (is_callable($allocator)) {
             return $allocator($this);
         }

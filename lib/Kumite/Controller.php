@@ -22,7 +22,7 @@ class Controller
         $this->testConfig = $testConfig;
     }
 
-    public function start($testKey, $metadata = null)
+    public function start($testKey, $metadata = null, $allocatorOverride = null)
     {
         $test = $this->getTest($testKey);
         if (!$test->active()) {
@@ -30,7 +30,7 @@ class Controller
         }
 
         if (!$this->getCookie($test)) {
-            $variantKey = $test->allocate();
+            $variantKey = $test->allocate($allocatorOverride);
             if ($variantKey) {
                 $participantId = $test->createParticipant($variantKey, $metadata);
                 $this->setCookie($test, $variantKey, $participantId);

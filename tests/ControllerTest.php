@@ -35,7 +35,7 @@ class ControllerTest extends BaseTest
         ;
 
         $c = $this->createController();
-        $c->startTest('myTest');
+        $c->start('myTest');
         return $c;
     }
 
@@ -45,7 +45,7 @@ class ControllerTest extends BaseTest
             'enabled' => false,
         ));
 
-        $c->startTest('myTest');
+        $c->start('myTest');
     }
 
     public function testStartTestCookie()
@@ -53,35 +53,35 @@ class ControllerTest extends BaseTest
         $this->expectGetCookie();
         $c = $this->createController();
 
-        $c->startTest('myTest');
+        $c->start('myTest');
     }
 
     public function testNotInTest()
     {
         $this->expectGetCookieNull();
         $c = $this->createController();
-        $this->assertEquals($c->isInTest('myTest'), false);
+        $this->assertEquals($c->inTest('myTest'), false);
     }
 
     public function testIsInTest()
     {
         $this->expectGetCookie();
         $c = $this->createController();
-        $this->assertEquals($c->isInTest('myTest'), true);
+        $this->assertEquals($c->inTest('myTest'), true);
     }
 
     public function testGetActiveVariantCookie()
     {
         $this->expectGetCookie();
         $c = $this->createController();
-        $this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
+        $this->assertEquals($c->variant('myTest')->key(), 'austvideo');
     }
 
     public function testGetActiveVariantNoCookie()
     {
         $this->expectGetCookieNull();
         $c = $this->createController();
-        $this->assertEquals($c->getActiveVariant('myTest')->key(), 'control');
+        $this->assertEquals($c->variant('myTest')->key(), 'control');
     }
 
     public function testAddEventCookie()
@@ -90,21 +90,21 @@ class ControllerTest extends BaseTest
         $this->expectEventStorage();
 
         $c = $this->createController();
-        $c->addEvent('myTest', 'sale', array('amount' => 300));
+        $c->event('myTest', 'sale', array('amount' => 300));
     }
 
     public function testAddEventNoCookie()
     {
         $this->expectGetCookieNull();
         $c = $this->createController();
-        $c->addEvent('myTest', 'sale', array('amount' => 300));
+        $c->event('myTest', 'sale', array('amount' => 300));
     }
 
     public function testAddEventOffline()
     {
         $this->expectEventStorage();
         $c = $this->createController();
-        $c->addEventOffline('myTest', 'austvideo', 'sale', 100, array('amount' => 300));
+        $c->eventOffline('myTest', 'austvideo', 'sale', 100, array('amount' => 300));
     }
 
     public function testStartStarted()
@@ -112,20 +112,20 @@ class ControllerTest extends BaseTest
         $c = $this->testStartTestNoCookie();
 
         // should do nothing
-        $c->startTest('myTest');
+        $c->start('myTest');
     }
 
     public function testGetActiveVariantStarted()
     {
         $c = $this->testStartTestNoCookie();
-        $this->assertEquals($c->getActiveVariant('myTest')->key(), 'austvideo');
+        $this->assertEquals($c->variant('myTest')->key(), 'austvideo');
     }
 
     public function testAddEventStarted()
     {
         $c = $this->testStartTestNoCookie();
         $this->expectEventStorage();
-        $c->addEvent('myTest', 'sale', array('amount' => 300));
+        $c->event('myTest', 'sale', array('amount' => 300));
     }
 
     private function expectGetCookieNull()
@@ -168,23 +168,23 @@ class ControllerTest extends BaseTest
 
     private function createController($options = array())
     {
-        $this->test = new Kumite\Test('myTest', array_merge(array(
-                'enabled' => true,
-                'allocator' => function($test) {
-                    return 'austvideo';
-                },
-                'default' => 'control',
-                'variants' => array(
-                    'control',
-                    'austvideo' => array('listid' => '7ae4be2')
-                ),
-                'events' => array(
-                    'sale'
-                )
-            ), $options), $this->storageAdapter
-        );
-        return new Kumite\Controller(array(
-            'myTest' => $this->test
-            ), $this->cookieAdapter);
+        $testConfig = array_merge(array(
+            'enabled' => true,
+            'allocator' => function($test) {
+                return 'austvideo';
+            },
+            'default' => 'control',
+            'variants' => array(
+                'control',
+                'austvideo' => array('listid' => '7ae4be2')
+            ),
+            'events' => array(
+                'sale'
+            )
+        ), $options);
+
+        return new Kumite\Controller($this->cookieAdapter, $this->storageAdapter, array(
+            'myTest' => $testConfig
+        ));
     }
 }

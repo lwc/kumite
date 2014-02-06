@@ -5,52 +5,61 @@ use Kumite\Exception;
 class Kumite
 {
     private static $instance;
-    private static $now;
-    private $controller;
-    private $config;
-    private $cookieAdapter;
-    private $storageAdapter;
 
     // @codeCoverageIgnoreStart
     public static function start($testKey, $metadata = null)
     {
         self::assertSetup();
-        self::$instance->startTest($testKey, $metadata);
+        self::$instance->start($testKey, $metadata);
     }
 
     public static function inTest($testKey)
     {
         self::assertSetup();
-        return self::$instance->isInTest($testKey);
+        return self::$instance->inTest($testKey);
     }
 
     public static function participantId($testKey)
     {
         self::assertSetup();
-        return self::$instance->getParticipantId($testKey);
+        return self::$instance->participantId($testKey);
     }
 
     public static function event($testKey, $eventKey, $metadata = null)
     {
         self::assertSetup();
-        self::$instance->addEvent($testKey, $eventKey, $metadata);
+        self::$instance->event($testKey, $eventKey, $metadata);
     }
 
     public static function eventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata = null)
     {
         self::assertSetup();
-        self::$instance->addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata);
+        self::$instance->eventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata);
     }
 
     public static function variant($testKey)
     {
         self::assertSetup();
-        return self::$instance->getActiveVariant($testKey);
+        return self::$instance->variant($testKey);
     }
 
     public static function setup($configuration)
     {
-        self::$instance = new Kumite($configuration);
+        if (!isset($configuration['storageAdapter']))
+            throw new Exception('Missing storageAdapter configuration');
+        if (!isset($configuration['tests']))
+            throw new Exception('Missing tests configuration');
+
+        $cookieAdapter = new Kumite\Adapters\PhpCookieAdapter();
+
+        if (isset($configuration['cookieAdapter'])) {
+            $cookieAdapter = $configuration['cookieAdapter'];
+        }
+
+        $storageAdapter = $configuration['storageAdapter'];
+        $testConfig = $configuration['tests'];
+
+        self::$instance = new Kumite\Controller($cookieAdapter, $storageAdapter, $testConfig);
     }
 
     private static function assertSetup()
@@ -60,77 +69,4 @@ class Kumite
     }
 
     // @codeCoverageIgnoreEnd
-
-    public function __construct($configuration)
-    {
-        if (!isset($configuration['storageAdapter']))
-            throw new Exception('Missing storageAdapter configuration');
-        if (!isset($configuration['tests']))
-            throw new Exception('Missing tests configuration');
-
-        if (isset($configuration['cookieAdapter']))
-            $this->cookieAdapter = $configuration['cookieAdapter'];
-        else
-            $this->cookieAdapter = new Kumite\Adapters\PhpCookieAdapter();
-
-        $this->storageAdapter = $configuration['storageAdapter'];
-        $this->config = $configuration['tests'];
-    }
-
-    public function startTest($testKey, $metadata=null)
-    {
-        $this->init();
-        $this->controller->startTest($testKey, $metadata);
-    }
-
-    public function getTests()
-    {
-        $this->init();
-        return $this->controller->getTests();
-    }
-
-    public function isInTest($testKey)
-    {
-        $this->init();
-        return $this->controller->isInTest($testKey);
-    }
-
-    public function getParticipantId($testKey)
-    {
-        $this->init();
-        return $this->controller->getParticipantId($testKey);
-    }
-
-    public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata=null)
-    {
-        $this->init();
-        $this->controller->addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata);
-    }
-
-    public function addEvent($testKey, $eventKey, $metadata=null)
-    {
-        $this->init();
-        $this->controller->addEvent($testKey, $eventKey, $metadata);
-    }
-
-    public function getActiveVariant($testKey)
-    {
-        $this->init();
-        return $this->controller->getActiveVariant($testKey);
-    }
-
-    public function init()
-    {
-        if (!isset($this->controller)) {
-            $config = $this->config;
-            if (is_callable($config)) {
-                $config = $config();
-            }
-            $tests = array();
-            foreach ($config as $testKey => $config) {
-                $tests[$testKey] = new Kumite\Test($testKey, $config, $this->storageAdapter);
-            }
-            $this->controller = new Kumite\Controller($tests, $this->cookieAdapter);
-        }
-    }
 }

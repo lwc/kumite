@@ -5,18 +5,24 @@ namespace Kumite;
 class Controller
 {
     const COOKIE_PREFIX = 'kumite__';
+    const OVERRIDE_COOKIE_PREFIX = 'kumite__override__';
 
     private $cookieAdapter;
+    private $storageAdapter;
+    private $testConfig;
+
     private $tests = array();
     private $unsavedCookies = array();
 
-    public function __construct($tests, $cookieAdapter)
+
+    public function __construct($cookieAdapter, $storageAdapter, $testConfig)
     {
-        $this->tests = $tests;
         $this->cookieAdapter = $cookieAdapter;
+        $this->storageAdapter = $storageAdapter;
+        $this->testConfig = $testConfig;
     }
 
-    public function startTest($testKey, $metadata = null)
+    public function start($testKey, $metadata = null)
     {
         $test = $this->getTest($testKey);
         if (!$test->active()) {
@@ -32,7 +38,13 @@ class Controller
         }
     }
 
-    public function getParticipantId($testKey)
+    public function resume($testKey, $variantKey, $participantId)
+    {
+        $test = $this->getTest($testKey);
+        $this->setCookie($test, $variantKey, $participantId);
+    }
+
+    public function participantId($testKey)
     {
         $test = $this->getTest($testKey);
         $cookie = $this->getCookie($test);
@@ -41,34 +53,58 @@ class Controller
         }
     }
 
-    public function isInTest($testKey)
+    public function inTest($testKey)
     {
         $test = $this->getTest($testKey);
         return (bool) $this->getCookie($test);
     }
 
-    public function getActiveVariant($testKey)
+    public function variant($testKey)
     {
         $test = $this->getTest($testKey);
         $cookie = $this->getCookie($test);
-        if (!$cookie)
+        if (!$cookie) {
             return $test->getDefault();
+        }
         return $test->variant($cookie['variant']);
     }
 
-    public function addEventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata)
+    public function eventOffline($testKey, $variantKey, $eventKey, $participantId, $metadata)
     {
         $test = $this->getTest($testKey);
         $test->createEvent($variantKey, $eventKey, $participantId, $metadata);
     }
 
-    public function addEvent($testKey, $eventKey, $metadata = null)
+    public function event($testKey, $eventKey, $metadata = null)
     {
         $test = $this->getTest($testKey);
         $cookie = $this->getCookie($test);
         if ($cookie) {
             $test->createEvent($cookie['variant'], $eventKey, $cookie['pid'], $metadata);
         }
+    }
+
+    public function getTests()
+    {
+        foreach (array_keys($this->testConfig) as $testKey) {
+            $this->getTest($testKey);
+        }
+        return $this->tests;
+    }
+
+    /**
+     * @param type $testKey
+     * @return Test
+     */
+    public function getTest($testKey)
+    {
+        if (!isset($this->tests[$testKey])) {
+            if (!isset($this->testConfig[$testKey])) {
+                throw new Exception("Missing test configuration for key '$testKey'");
+            }
+            $this->tests[$testKey] = new Test($testKey, $this->testConfig[$testKey], $this->storageAdapter);
+        }
+        return $this->tests[$testKey];
     }
 
     private function setCookie(Test $test, $variantKey, $participantId)
@@ -92,19 +128,5 @@ class Controller
     private function cookieName(Test $test)
     {
         return self::COOKIE_PREFIX . $test->key() . $test->version();
-    }
-
-    public function getTests()
-    {
-        return $this->tests;
-    }
-
-    /**
-     * @param type $testKey
-     * @return Test
-     */
-    public function getTest($testKey)
-    {
-        return $this->tests[$testKey];
     }
 }

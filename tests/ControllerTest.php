@@ -42,8 +42,7 @@ class ControllerTest extends BaseTest
     public function testStartTestNoCookieInactive()
     {
         $c = $this->createController(array(
-            'start' => '2012-06-01',
-            'end' => '2012-06-01',
+            'enabled' => false,
         ));
 
         $c->startTest('myTest');
@@ -170,8 +169,7 @@ class ControllerTest extends BaseTest
     private function createController($options = array())
     {
         $this->test = new Kumite\Test('myTest', array_merge(array(
-                'start' => '2012-01-01',
-                'end' => '2012-02-01',
+                'enabled' => true,
                 'allocator' => function($test) {
                     return 'austvideo';
                 },

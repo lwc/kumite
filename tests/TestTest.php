@@ -66,8 +66,7 @@ class TestTest extends BaseTest
         $storageAdapter = Mockery::mock('Kumite\\Adapters\\StorageAdapter');
 
         return new Kumite\Test('videotest', array_merge(array(
-                'start' => '2012-01-01',
-                'end' => '2012-02-01',
+                'enabled' => true,
                 'default' => 'control',
                 'allocator' => function($test) {
                     return 'austvideo';

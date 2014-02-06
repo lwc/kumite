@@ -53,17 +53,6 @@ class Kumite
         self::$instance = new Kumite($configuration);
     }
 
-    public static function now($now = null)
-    {
-        if ($now)
-            self::$now = $now;
-
-        if (self::$now)
-            return self::$now;
-
-        return time();
-    }
-
     private static function assertSetup()
     {
         if (!isset(self::$instance))

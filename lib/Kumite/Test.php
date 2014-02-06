@@ -8,8 +8,6 @@ class Test
     private $storageAdapter;
     private $allocator;
     private $key;
-    private $start;
-    private $end;
     private $enabled;
     private $default = 'control';
     private $version;
@@ -23,19 +21,9 @@ class Test
         $this->key = $key;
 
         foreach ($this->requiredKeys() as $requiredKey) {
-            if (!array_key_exists($requiredKey, $config))
+            if (!array_key_exists($requiredKey, $config)) {
                 throw new Exception("Test '$key' missing config key '$requiredKey'");
-        }
-
-        if (isset($config['enabled'])) {
-            $this->enabled = $config['enabled'];
-        }
-        else if (isset($config['start']) && isset($config['end'])) {
-            $this->start = strtotime($config['start']);
-            $this->end = strtotime($config['end']);
-        }
-        else {
-            throw new Exception('Either enabled or start & end must be defined');
+            }
         }
 
         if (isset($config['default'])) {
@@ -52,13 +40,15 @@ class Test
         $this->allocator = $config['allocator'];
 
         foreach ($config['variants'] as $key => $value) {
-            if (is_array($value))
+            if (is_array($value)) {
                 $this->variants[$key] = new Variant($key, $value);
-            else
+            } else {
                 $this->variants[$value] = new Variant($value);
+            }
         }
 
         $this->events = $config['events'];
+        $this->enabled = $config['enabled'];
 
         if (!array_key_exists($this->default, $this->variants)) {
             throw new Exception("Default variant '{$this->default}' found");
@@ -72,10 +62,7 @@ class Test
 
     public function active()
     {
-        if (isset($this->enabled)) {
-            return $this->enabled;
-        }
-        return (($this->start < \Kumite::now()) && ($this->end > \Kumite::now()));
+        return $this->enabled;
     }
 
     public function version()
@@ -145,7 +132,8 @@ class Test
         return array(
             'variants',
             'events',
-            'allocator'
+            'allocator',
+            'enabled'
         );
     }
 }

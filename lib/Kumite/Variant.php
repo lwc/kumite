@@ -5,9 +5,9 @@ namespace Kumite;
 class Variant
 {
     private $key;
-    private $properties;
+    private $properties = array();
 
-    public function __construct($key, $properties=null)
+    public function __construct($key, array $properties=array())
     {
         $this->key = $key;
         $this->properties = $properties;
@@ -28,9 +28,14 @@ class Variant
 
     public function property($key, $default=null)
     {
-        if (isset($this->properties) && isset($this->properties[$key])) {
+        if (isset($this->properties[$key])) {
             return $this->properties[$key];
         }
         return $default;
+    }
+
+    public function __toString()
+    {
+        return $this->key;
     }
 }

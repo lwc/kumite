@@ -14,10 +14,12 @@ class Kumite
 
     public static function setup($configuration)
     {
-        if (!isset($configuration['storageAdapter']))
+        if (!isset($configuration['storageAdapter'])) {
             throw new Exception('Missing storageAdapter configuration');
-        if (!isset($configuration['tests']))
+        }
+        if (!isset($configuration['tests'])) {
             throw new Exception('Missing tests configuration');
+        }
 
         $cookieAdapter = new Kumite\Adapters\PhpCookieAdapter();
 
@@ -33,7 +35,8 @@ class Kumite
 
     private static function assertSetup()
     {
-        if (!isset(self::$instance))
+        if (!isset(self::$instance)) {
             throw new Exception("Kumite::setup() needs to be called before this method");
+        }
     }
 }

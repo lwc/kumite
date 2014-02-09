@@ -178,6 +178,37 @@ class Controller
         return $this->tests[$testKey];
     }
 
+    /**
+     * Serialise the state of all active tests for the current request
+     *
+     * @return array state of active tests, indexed by test key
+     */
+    public function freeze()
+    {
+        $state = $this->unsavedCookies;
+        foreach ($this->cookieAdapter->getCookies() as $key => $value) {
+            if (strpos($key, self::COOKIE_PREFIX) === 0) {
+                $keyParts = explode('__', $key);
+                $testKey = $keyParts[1];
+                $state[$testKey] = $this->getCookie($this->getTest($testKey));
+            }
+        }
+        return $state;
+    }
+
+    /**
+     * Takes an array of test state and reloads it into the current request.
+     * @see Controller::freeze()
+     *
+     * @param type $activeTests
+     */
+    public function thaw($activeTests)
+    {
+        foreach ($activeTests as $testKey => $testData) {
+            $this->resume($testKey, $testData['variant'], $testData['pid']);
+        }
+    }
+
     private function setCookie(Test $test, $variantKey, $participantId)
     {
         $cookieData = array(
@@ -198,6 +229,7 @@ class Controller
 
     private function cookieName(Test $test)
     {
-        return self::COOKIE_PREFIX . $test->key() . $test->version();
+        $version = isset($test->version()) ? '__' . $test->version() : '';
+        return self::COOKIE_PREFIX . $test->key() . $version;
     }
 }

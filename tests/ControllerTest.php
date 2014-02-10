@@ -92,6 +92,13 @@ class ControllerTest extends BaseTest
         $this->assertEquals($c->variant('myTest')->key(), 'control');
     }
 
+    public function testGetActiveVariantImitating()
+    {
+        $this->expectImitateCookie();
+        $c = $this->createController();
+        $this->assertEquals($c->variant('myTest'), 'newVariant');
+    }
+
     public function testAddEventCookie()
     {
         $this->expectGetCookie();
@@ -158,6 +165,26 @@ class ControllerTest extends BaseTest
                 'variant' => 'austvideo',
                 'pid' => 100
             )))
+            ->globally()
+            ->ordered()
+        ;
+    }
+
+    private function expectImitateCookie()
+    {
+        $this->cookieAdapter
+            ->shouldReceive('getCookie')
+            ->once()
+            ->with('kumite__myTest')
+            ->andReturn(null)
+            ->globally()
+            ->ordered()
+        ;
+        $this->cookieAdapter
+            ->shouldReceive('getCookie')
+            ->once()
+            ->with('imitate__kumite__myTest')
+            ->andReturn('newVariant')
             ->globally()
             ->ordered()
         ;

@@ -139,8 +139,8 @@ class Controller
         if ($cookie) {
             return $test->variant($cookie['variant']);
         }
-        if ($this->imitationVariant($testKey)) {
-            return $this->imitationVariant($testKey);
+        if ($imitationVariant = $this->imitationVariant($testKey)) {
+            return $imitationVariant;
         }
         return $test->getDefault();
     }

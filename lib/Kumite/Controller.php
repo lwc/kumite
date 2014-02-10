@@ -73,11 +73,24 @@ class Controller
         $this->setCookie($test, $variantKey, $participantId);
     }
 
+    /**
+     * Sets a cookie that imitates being in a variant in a test.
+     *
+     * Only effects calls to variant. The methods inTest and participantId are
+     * unaware of the imitation.
+     *
+     * @param string $testKey
+     * @param string $variantKey
+     */
     public function imitate($testKey, $variantKey)
     {
         $this->cookieAdapter->setCookie(self::IMITATE_COOKIE_PREFIX . $testKey, $variantKey);
     }
 
+    /**
+     * Removes the imitation cookie.
+     * @param string $testKey
+     */
     public function stopImitating($testKey)
     {
         $this->cookieAdapter->setCookie(self::IMITATE_COOKIE_PREFIX . $testKey, null);

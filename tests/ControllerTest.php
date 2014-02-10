@@ -80,6 +80,14 @@ class ControllerTest extends BaseTest
     public function testGetActiveVariantNoCookie()
     {
         $this->expectGetCookieNull();
+        $this->cookieAdapter
+            ->shouldReceive('getCookie')
+            ->once()
+            ->with('imitate__kumite__myTest')
+            ->andReturn(null)
+            ->globally()
+            ->ordered()
+        ;
         $c = $this->createController();
         $this->assertEquals($c->variant('myTest')->key(), 'control');
     }

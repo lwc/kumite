@@ -5,7 +5,7 @@ namespace Kumite;
 class Controller
 {
     const COOKIE_PREFIX = 'kumite__';
-    const IMITATE_COOKIE_PREFIX = 'imitate__kumite';
+    const IMITATE_COOKIE_PREFIX = 'imitate__kumite__';
 
     /**
      *
@@ -259,7 +259,8 @@ class Controller
 
     private function cookieName(Test $test)
     {
-        $version = isset($test->version()) ? '__' . $test->version() : '';
+        $version = $test->version();
+        $version = isset($version) ? '__' . $version : '';
         return self::COOKIE_PREFIX . $test->key() . $version;
     }
 

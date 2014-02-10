@@ -5,8 +5,12 @@ namespace Kumite;
 class Controller
 {
     const COOKIE_PREFIX = 'kumite__';
-    const OVERRIDE_COOKIE_PREFIX = 'kumite__override__';
+    const IMITATE_COOKIE_PREFIX = 'imitate__kumite';
 
+    /**
+     *
+     * @var Adapters\CookieAdapter
+     */
     private $cookieAdapter;
     private $storageAdapter;
     private $testConfig;
@@ -69,6 +73,16 @@ class Controller
         $this->setCookie($test, $variantKey, $participantId);
     }
 
+    public function imitate($testKey, $variantKey)
+    {
+        $this->cookieAdapter->setCookie(self::IMITATE_COOKIE_PREFIX . $testKey, $variantKey);
+    }
+
+    public function stopImitating($testKey)
+    {
+        $this->cookieAdapter->setCookie(self::IMITATE_COOKIE_PREFIX . $testKey, null);
+    }
+
     /**
      * Return the participant identifier for the test.
      *
@@ -109,10 +123,13 @@ class Controller
     {
         $test = $this->getTest($testKey);
         $cookie = $this->getCookie($test);
-        if (!$cookie) {
-            return $test->getDefault();
+        if ($cookie) {
+            return $test->variant($cookie['variant']);
         }
-        return $test->variant($cookie['variant']);
+        if ($this->imitationVariant($testKey)) {
+            return $this->imitationVariant($testKey);
+        }
+        return $test->getDefault();
     }
 
     /**
@@ -231,5 +248,10 @@ class Controller
     {
         $version = isset($test->version()) ? '__' . $test->version() : '';
         return self::COOKIE_PREFIX . $test->key() . $version;
+    }
+
+    private function imitationVariant($testKey)
+    {
+        return $this->cookieAdapter->getCookie(self::IMITATE_COOKIE_PREFIX . $testKey);
     }
 }

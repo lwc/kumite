@@ -1,6 +1,6 @@
 {
     "name": "lwc/kumite",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "type": "library",
     "description": "A simple library for multivariate testing in web applications",
     "keywords": ["multivariate", "split", "a-b", "testing"],
@@ -16,7 +16,8 @@
         "phpunit/phpunit": "~3.7"
     },
     "suggest": {
-        "lwc/kumite-moa": "Easily save kumite data in mongodb using moa"
+        "lwc/kumite-moa": "Easily save kumite data in mongodb using moa",
+        "lwc/kumite-pheasant": "Easily save kumite data in mysql using pheasant"
     },
     "autoload": {
         "psr-0": { "Kumite": "lib" }

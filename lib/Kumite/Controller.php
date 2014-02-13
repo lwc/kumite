@@ -234,8 +234,14 @@ class Controller
      */
     public function thaw($activeTests)
     {
+        if (!is_array($activeTests)) {
+            return;
+        }
         foreach ($activeTests as $testKey => $testData) {
-            $this->resume($testKey, $testData['variant'], $testData['pid']);
+
+            if (isset($testData['variant']) && isset($testData['pid'])) {
+                $this->resume($testKey, $testData['variant'], $testData['pid']);
+            }
         }
     }
 

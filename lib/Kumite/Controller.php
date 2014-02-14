@@ -220,7 +220,14 @@ class Controller
             if (strpos($key, self::COOKIE_PREFIX) === 0) {
                 $keyParts = explode('__', $key);
                 $testKey = $keyParts[1];
-                $state[$testKey] = $this->getCookie($this->getTest($testKey));
+                try {
+                    $test = $this->getTest($testKey);
+                    $cookie = $this->getCookie($test);
+                    if ($cookie) {
+                        $state[$testKey] = $cookie;
+                    }
+                } catch (\Exception $e) {
+                }
             }
         }
         return $state;

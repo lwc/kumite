@@ -35,7 +35,7 @@ The easiest way to install is via composer: `composer require lwc/kumite`
 
 ##### Starting tests
 In order to run a test, you must first select a starting point for your test. Typically this will happen inside a controller action in your application.
-When starting a test, you must provide an allocation method, in form of an instance that implements [Allocator](/lwc/kumite/blob/master/lib/Kumite/Allocator.php), something callable, or a constant value representing a variant.
+When starting a test, you must provide the test key of the defined test and optionally an array of metadata to attach to the test participant and allocation method that will override the method declared in the test definition. Allocators must be an instance that implements [Allocator](/lwc/kumite/blob/master/lib/Kumite/Allocator.php), something callable in php terms, or a constant value representing a variant.
 
 Using a constant value:
 ```php
@@ -45,9 +45,11 @@ Using a constant value:
 function productPage()
 {
   // place users into variants based on a query string value. Useful for integrating with external tools.
-  Kumite::start('pricing-test', $_GET['v']);
+  Kumite::start('pricing-test', null, $_GET['v']);
 }
 ```
+
+
 
 Using the Allocator interface:
 ```php
@@ -66,7 +68,7 @@ class MyRandomAllocator implements Kumite\Allocator
 // some controller action
 function productPage()
 {
-  Kumite::start('pricing-test', new MyRandomAllocator());
+  Kumite::start('pricing-test', null, new MyRandomAllocator());
 }
 ```
 
@@ -78,11 +80,12 @@ Using a callback:
 function productPage()
 {
   $user = getActiveUser();
-  
-  // place users into variants based on user id. Logged out users are disqualified from participating
-  Kumite::start('pricing-test', function($variantKeys) use($user) {
-    if ($user)
-    {
+  $metadata = array(
+    'userId' => isset($user) ? $user->id : null
+  );
+  // place users into variants based on user id (why, who knows?!). Logged out users are disqualified from participating
+  Kumite::start('pricing-test', $metadata, function($variantKeys) use($user) {
+    if ($user) {
       return $variantKeys[$user->id() % count($variantKeys)]; 
     }
     return null; // user is logged out
@@ -94,7 +97,7 @@ function productPage()
 There are two main ways to vary content to participants in a test, via the variant key and via variant properties:
 ```php
 
-<?php if (Kumite::variant('pricing-test')->key() == 'lowerprice'): ?>
+<?php if (Kumite::variant('pricing-test') == 'lowerprice'): ?>
   <div>
     <p>Look at our new low price of <?php echo Kumite::variant('pricing-test')->property('price') ?></p>
   </div>
@@ -125,13 +128,14 @@ Tests are defined in the following format:
 
 $config = array(
   'pricing-test' => array(
-  'start' => '2012-01-01', // The test will be active between the start and end times
-  'end' => '2012-02-01',
+  'allocator' => new Allocators\UCB1Allocator('purchase') // there are several included allocators, or define your own
+  'active' => true, // controls allocation to tests, events will still be tracked for participants 
     'default' => 'control', // defines the default variant, served to request not participating in the test. Typically the control.
     'variants' => array(
       'control', // this variant defines no properties
       'lowerprice' => array('price' => '$300') // this variant defines properties
-    )
+    ),
+    'events' => array('purchase', 'refund')
   )
 );
 ```
@@ -189,6 +193,17 @@ class MyStorageAdapter implements Kumite\Adapters\StorageAdapter
 			'metadata' => $metadata			
 		));
 		$event->save();
+	}
+	
+	// used for results and for intelligent allocators, such as UCB1
+	public function countParticipants($testKey, $variantKey)
+	{
+		return Participant::getTotalForVariant($testKey, $variantKey);
+	}
+	
+	public function countEvents($testKey, $variantKey, $eventKey)
+	{
+		return Event::getTotalForEvent($testKey, $variantKey, $eventKey);
 	}
 }
 ```

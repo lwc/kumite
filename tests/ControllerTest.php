@@ -96,7 +96,10 @@ class ControllerTest extends BaseTest
     {
         $this->expectImitateCookie();
         $c = $this->createController();
-        $this->assertEquals($c->variant('myTest'), 'newVariant');
+        $variant = $c->variant('myTest');
+
+        $this->assertEquals($variant->key(), 'newVariant');
+        $this->assertEquals($variant, 'newVariant');
     }
 
     public function testAddEventCookie()

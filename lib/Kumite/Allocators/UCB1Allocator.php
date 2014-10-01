@@ -6,7 +6,7 @@ use Kumite\Allocator;
 
 class UCB1Allocator implements Allocator
 {
-    public function allocate(\Kumite\Test $test, $options)
+    public function allocate(\Kumite\Test $test, array $options)
     {
         $event = $options['event'];
 

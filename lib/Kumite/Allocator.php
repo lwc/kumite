@@ -4,5 +4,5 @@ namespace Kumite;
 
 interface Allocator
 {
-	public function allocate(Test $test);
+    public function allocate(Test $test, array $options);
 }

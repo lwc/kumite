@@ -7,6 +7,7 @@ class Test
 
     private $storageAdapter;
     private $allocator;
+    private $allocatorOptions = array();
     private $key;
     private $enabled;
     private $default = 'control';
@@ -15,10 +16,15 @@ class Test
     private $events;
     private $results;
 
-    public function __construct($key, $config, $storageAdapter)
+    public function __construct($key, $config, $allocator, $storageAdapter)
     {
         $this->storageAdapter = $storageAdapter;
         $this->key = $key;
+        $this->allocator = $allocator;
+
+        if (!$allocator instanceof Allocator && !is_callable($allocator) ) {
+            throw new Exception('Allocator must be callable, instance of Kumite\\Allocator');
+        }
 
         foreach ($this->requiredKeys() as $requiredKey) {
             if (!array_key_exists($requiredKey, $config)) {
@@ -34,10 +40,9 @@ class Test
             $this->version = $config['version'];
         }
 
-        if (!$config['allocator'] instanceof Allocator && !is_callable($config['allocator']) ) {
-            throw new Exception('Allocator must be callable, instance of Kumite\\Allocator');
+        if (isset($config['allocator']['options'])) {
+            $this->allocatorOptions = $config['allocator']['options'];
         }
-        $this->allocator = $config['allocator'];
 
         foreach ($config['variants'] as $key => $value) {
             if (is_array($value)) {
@@ -102,9 +107,9 @@ class Test
             return $allocator;
         }
         if (is_callable($allocator)) {
-            return $allocator($this);
+            return $allocator($this, $this->allocatorOptions);
         }
-        return $allocator->allocate($this);
+        return $allocator->allocate($this, $this->allocatorOptions);
     }
 
     public function createParticipant($variantKey, $metadata = null)

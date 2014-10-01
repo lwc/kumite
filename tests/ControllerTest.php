@@ -205,9 +205,10 @@ class ControllerTest extends BaseTest
     {
         $testConfig = array_merge(array(
             'enabled' => true,
-            'allocator' => function($test) {
-                return 'austvideo';
-            },
+            'allocator' => array(
+                'options' => array(),
+                'method' => 'my-allocator'
+            ),
             'default' => 'control',
             'variants' => array(
                 'control',
@@ -218,8 +219,12 @@ class ControllerTest extends BaseTest
             )
         ), $options);
 
-        return new Kumite\Controller($this->cookieAdapter, $this->storageAdapter, array(
+        $controller = new Kumite\Controller($this->cookieAdapter, $this->storageAdapter, array(
             'myTest' => $testConfig
         ));
+        $controller->addAllocator('my-allocator', function($test) {
+            return 'austvideo';
+        });
+        return $controller;
     }
 }

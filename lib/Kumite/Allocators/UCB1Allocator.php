@@ -6,15 +6,10 @@ use Kumite\Allocator;
 
 class UCB1Allocator implements Allocator
 {
-    private $event;
-
-    public function __construct($event)
+    public function allocate(\Kumite\Test $test, $options)
     {
-        $this->event = $event;
-    }
+        $event = $options['event'];
 
-    public function allocate(\Kumite\Test $test)
-    {
         $ucbValues = array();
 
         foreach ($test->variantKeys() as $v) {
@@ -24,7 +19,7 @@ class UCB1Allocator implements Allocator
             if ($armCount == 0)
                 return $v;
 
-            $r = $this->getConversionRate($v, $test);
+            $r = $this->getConversionRate($v, $test, $event);
             $b = $this->getBonus($v, $test);
 
             $ucbValues[$v] = $r + $b;
@@ -39,14 +34,14 @@ class UCB1Allocator implements Allocator
         return $test->countParticipants($v);
     }
 
-    private function getEventCount($v, $test)
+    private function getEventCount($v, $test, $event)
     {
-        return $test->countEvents($v, $this->event);
+        return $test->countEvents($v, $event);
     }
 
-    private function getConversionRate($variant, $test)
+    private function getConversionRate($variant, $test, $event)
     {
-        $e = $this->getEventCount($variant, $test);
+        $e = $this->getEventCount($variant, $test, $event);
         $n = $this->getArmCount($variant, $test);
         return $e / (float) $n;
     }

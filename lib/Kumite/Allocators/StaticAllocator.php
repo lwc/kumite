@@ -7,15 +7,8 @@ use Kumite\Test;
 
 class StaticAllocator implements Allocator
 {
-    private $variant;
-
-    public function __construct($variant)
+    public function allocate(Test $test, array $options)
     {
-        $this->variant = $variant;
-    }
-
-    public function allocate(Test $test)
-    {
-        return $this->variant;
+        return $options['variant'];
     }
 }

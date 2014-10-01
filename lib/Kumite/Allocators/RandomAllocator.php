@@ -7,7 +7,7 @@ use Kumite\Test;
 
 class RandomAllocator implements Allocator
 {
-    public function allocate(Test $test)
+    public function allocate(Test $test, array $options)
     {
         $keys = $test->variantKeys();
         $index = array_rand($keys);

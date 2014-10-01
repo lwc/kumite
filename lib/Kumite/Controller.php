@@ -7,14 +7,10 @@ class Controller
     const COOKIE_PREFIX = 'kumite__';
     const IMITATE_COOKIE_PREFIX = 'imitate__kumite__';
 
-    /**
-     *
-     * @var Adapters\CookieAdapter
-     */
     private $cookieAdapter;
     private $storageAdapter;
     private $testConfig;
-
+    private $allocators = array();
     private $tests = array();
     private $unsavedCookies = array();
 
@@ -203,9 +199,16 @@ class Controller
             if (!isset($this->testConfig[$testKey])) {
                 throw new Exception("Missing test configuration for key '$testKey'");
             }
-            $this->tests[$testKey] = new Test($testKey, $this->testConfig[$testKey], $this->storageAdapter);
+            $testConfig = $this->testConfig[$testKey];
+            $allocator = $this->getAllocator($testConfig['allocator']['method']);
+            $this->tests[$testKey] = new Test($testKey, $testConfig, $allocator, $this->storageAdapter);
         }
         return $this->tests[$testKey];
+    }
+
+    public function addAllocator($allocatorId, $allocator)
+    {
+        $this->allocators[$allocatorId] = $allocator;
     }
 
     /**
@@ -280,5 +283,13 @@ class Controller
     private function imitationVariant($testKey)
     {
         return $this->cookieAdapter->getCookie(self::IMITATE_COOKIE_PREFIX . $testKey);
+    }
+
+    private function getAllocator($allocatorId)
+    {
+        if (!isset($this->allocators[$allocatorId])) {
+            throw new Exception("'$allocatorId' not a registered allocator");
+        }
+        return $this->allocators[$allocatorId];
     }
 }

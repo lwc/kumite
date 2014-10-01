@@ -30,13 +30,14 @@ class TestTest extends BaseTest
 
     public function testMissingEnabledOrDateRange()
     {
+        $allocator = function($test) {};
         try {
             new Kumite\Test('videotest', array(
                 'variants' => array(
                     'control',
                     'austvideo' => array('listid' => '7ae4be2')
                 )
-            ), Mockery::mock('Kumite\\Adapters\\StorageAdapter'));
+            ), $allocator, Mockery::mock('Kumite\\Adapters\\StorageAdapter'));
             $this->fail('Expected exception');
         }
         catch (Kumite\Exception $e) {
@@ -46,6 +47,7 @@ class TestTest extends BaseTest
 
     public function testMissingDefaultVariant()
     {
+        $allocator = function($test) {};
         try {
             new Kumite\Test('videotest', array(
                 'enabled' => true,
@@ -53,7 +55,7 @@ class TestTest extends BaseTest
                     'meow',
                     'austvideo' => array('listid' => '7ae4be2'),
                 )
-            ), Mockery::mock('Kumite\\Adapters\\StorageAdapter'));
+            ), $allocator, Mockery::mock('Kumite\\Adapters\\StorageAdapter'));
             $this->fail('Expected exception');
         }
         catch (Kumite\Exception $e) {
@@ -65,19 +67,29 @@ class TestTest extends BaseTest
     {
         $storageAdapter = Mockery::mock('Kumite\\Adapters\\StorageAdapter');
 
-        return new Kumite\Test('videotest', array_merge(array(
-                'enabled' => true,
-                'default' => 'control',
-                'allocator' => function($test) {
-                    return 'austvideo';
-                },
-                'events' => array(
-                    'someEvent'
+        $allocator = function($test) {
+            return 'austvideo';
+        };
+
+        return new Kumite\Test(
+            'videotest',
+            array_merge(
+                array(
+                    'enabled' => true,
+                    'default' => 'control',
+                    'allocator' => '',
+                    'events' => array(
+                        'someEvent'
+                    ),
+                    'variants' => array(
+                        'control',
+                        'austvideo' => array('listid' => '7ae4be2')
+                    )
                 ),
-                'variants' => array(
-                    'control',
-                    'austvideo' => array('listid' => '7ae4be2')
-                )
-                ), $data), $storageAdapter);
+                $data
+            ),
+            $allocator,
+            $storageAdapter
+        );
     }
 }

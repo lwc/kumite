@@ -282,7 +282,9 @@ class Controller
 
     private function imitationVariant($testKey)
     {
-        return $this->cookieAdapter->getCookie(self::IMITATE_COOKIE_PREFIX . $testKey);
+        if ($variantKey = $this->cookieAdapter->getCookie(self::IMITATE_COOKIE_PREFIX . $testKey)) {
+            return new Variant($variantKey);
+        }
     }
 
     private function getAllocator($allocatorId)

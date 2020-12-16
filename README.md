@@ -14,9 +14,9 @@ Table of contents
 
 
 ### What is kumite?
-Kumite is a  framework for managing split testing.
+Kumite is a framework for managing split testing.
 
-It's purpose is to manage and track participants in split tests, as well as track events/outcomes. It makes no assumptions about how participants are allocated into variants.
+Its purpose is to manage and track participants in split tests, as well as track events/outcomes. It makes no assumptions about how participants are allocated into variants.
 
 Tests may be defined with a number of variants and an allocation strategy that can assign a variant to a request.
 Events may be tracked against variants, with optional metadata if desired.
